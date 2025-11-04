@@ -36,18 +36,24 @@ namespace TenForce_Initials.Services
                 // 1) Use moons[] entries if present (names)
                 var moonNames = new HashSet<string>(StringComparer.InvariantCultureIgnoreCase);
 
-                if (pDto.Moons != null)
+                if (pDto.Moons != null && pDto.Moons.Any())
                 {
                     foreach (var mr in pDto.Moons)
                     {
                         if (!string.IsNullOrEmpty(mr.Moon))
                             moonNames.Add(mr.Moon);
                     }
+                } else
+                {
+                    var orbitingMoons = bodies.Where(b => b.AroundPlanet?.Planet == pDto.Id).ToList();
+                    foreach (var om in orbitingMoons)
+                        moonNames.Add(om.EnglishName);
+
                 }
 
-                // 2) Also find bodies that have aroundPlanet referencing this planet
-                var candidateMoons = bodies.Where(b => b.AroundPlanet != null &&
-                    string.Equals(b.AroundPlanet.Planet ?? "", pDto.Id ?? "", StringComparison.InvariantCultureIgnoreCase)).ToList();
+                    // 2) Also find bodies that have aroundPlanet referencing this planet
+                    var candidateMoons = bodies.Where(b => b.AroundPlanet != null &&
+                        string.Equals(b.AroundPlanet.Planet ?? "", pDto.Id ?? "", StringComparison.InvariantCultureIgnoreCase)).ToList();
 
                 foreach (var m in candidateMoons)
                     if (!string.IsNullOrEmpty(m.EnglishName))
